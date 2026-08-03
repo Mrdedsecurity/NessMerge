@@ -17,8 +17,8 @@ BANNER = r"""
 |_| \_|\___||___/___/_|  |_|\___|_|  \__, |\___|
                                       |___/
         merge .nessus scans into one report
+                                       By MrDedSec
 """
-
 
 def print_banner():
     print(BANNER)
