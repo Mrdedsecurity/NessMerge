@@ -17,20 +17,26 @@ Merge multiple `.nessus` (Nessus XML) scan result files into a single combined r
 ## Usage
 
 ```bash
-python3 nessmerge.py -d <directory_with_.nessus_files> [-o output_path] [-r] [-v]
+python3 nessmerge.py [-d directory_with_.nessus_files] [-o output_path] [-r] [-v]
 ```
 
 ### Options
 
 | Flag | Long form | Description |
 |---|---|---|
-| `-d` | `--dir` | **(required)** Directory containing `.nessus` files to merge |
+| `-d` | `--dir` | Directory containing `.nessus` files to merge (default: the directory this script is located in) |
 | `-o` | `--output` | Output file path (default: `nss_report/report.nessus`) |
 | `-r` | `--recursive` | Also search subdirectories, not just the top level |
 | `-v` | `--verbose` | Enable debug-level logging |
 | `-h` | `--help` | Show usage and exit |
 
 ### Examples
+
+Merge everything in the same folder as the script into the default output location:
+
+```bash
+python3 nessmerge.py
+```
 
 Merge everything in `./scans` into the default output location:
 
