@@ -1,4 +1,13 @@
-# NessMerge
+```
+ _   _              __  __
+| \ | | ___  ___ ___|  \/  | ___ _ __ __ _  ___
+|  \| |/ _ \/ __/ __| |\/| |/ _ \ '__/ _` |/ _ \
+| |\  |  __/\__ \__ \ |  | |  __/ | | (_| |  __/
+|_| \_|\___||___/___/_|  |_|\___|_|  \__, |\___|
+                                      |___/
+        merge .nessus scans into one report
+                                       By MrDedSec
+```
 
 Merge multiple `.nessus` (Nessus XML) scan result files into a single combined report.
 
