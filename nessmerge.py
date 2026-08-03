@@ -30,9 +30,11 @@ def parse_args(argv):
     )
     parser.add_argument(
         "-d", "--dir",
-        required=True,
+        required=False,
         type=Path,
-        help="Directory containing .nessus files to merge",
+        default=None,
+        help="Directory containing .nessus files to merge "
+             "(default: the directory this script is located in)",
     )
     parser.add_argument(
         "-o", "--output",
@@ -140,7 +142,10 @@ def main(argv=None):
         format="%(message)s",
     )
 
-    target_dir = args.dir
+    target_dir = args.dir if args.dir is not None else Path(__file__).resolve().parent
+    if args.dir is None:
+        logger.info("No -d/--dir specified; using script directory: %s", target_dir)
+
     if not target_dir.is_dir():
         logger.error("Directory not found: %s", target_dir)
         sys.exit(2)
