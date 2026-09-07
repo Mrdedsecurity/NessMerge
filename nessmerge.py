@@ -48,6 +48,18 @@ def parse_args(argv):
         help="Search subdirectories recursively for .nessus files",
     )
     parser.add_argument(
+        "--extract-ips",
+        action="store_true",
+        help="After merging, also write a plain-text list of unique host IPs found in the report",
+    )
+    parser.add_argument(
+        "--ips-output",
+        type=Path,
+        default=Path("nss_report/ips.txt"),
+        help="Output file path for extracted IPs (default: nss_report/ips.txt). "
+             "Implies --extract-ips.",
+    )
+    parser.add_argument(
         "-v", "--verbose",
         action="store_true",
         help="Enable verbose (debug) logging",
@@ -64,7 +76,7 @@ def find_report_host(report, host_name):
 
 
 def find_report_item(host, port, plugin_id):
-    """Find a ReportItem element by port + pluginID without building unsafe XPath strings."""
+    
     for item in host.findall("ReportItem"):
         if item.attrib.get("port") == port and item.attrib.get("pluginID") == plugin_id:
             return item
@@ -72,11 +84,7 @@ def find_report_item(host, port, plugin_id):
 
 
 def merge_nessus_files(nessus_files):
-    """Merge a list of .nessus file paths into a single ElementTree. Returns the merged tree.
-
-    Files that fail to parse (malformed XML, unreadable, etc.) are logged and
-    skipped rather than aborting the whole run.
-    """
+    
     main_tree = None
     report = None
     skipped = []
@@ -132,6 +140,34 @@ def merge_nessus_files(nessus_files):
     return main_tree, skipped
 
 
+def extract_ips(report):
+    ips = set()
+
+    for host in report.findall("ReportHost"):
+        host_ip = None
+        host_props = host.find("HostProperties")
+        if host_props is not None:
+            for tag in host_props.findall("tag"):
+                if tag.attrib.get("name") == "host-ip" and tag.text:
+                    host_ip = tag.text.strip()
+                    break
+
+        if not host_ip:
+            host_ip = host.attrib.get("name")
+
+        if host_ip:
+            ips.add(host_ip)
+
+    return sorted(ips)
+
+
+def write_ips(ips, output_path):
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        for ip in ips:
+            f.write(ip + "\n")
+
+
 def main(argv=None):
     print_banner()
 
@@ -170,6 +206,12 @@ def main(argv=None):
 
     merged_tree.write(output_path, encoding="utf-8", xml_declaration=True)
     logger.info("Merged report written to %s", output_path)
+
+    if args.extract_ips or args.ips_output != Path("nss_report/ips.txt"):
+        report = merged_tree.getroot().find("Report")
+        ips = extract_ips(report)
+        write_ips(ips, args.ips_output)
+        logger.info("Extracted %d unique IP(s) to %s", len(ips), args.ips_output)
 
     if skipped:
         logger.warning(
